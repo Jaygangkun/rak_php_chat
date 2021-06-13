@@ -1,0 +1,19 @@
+.meldingHolder {
+	background: #19D895;
+	color: #fff;
+	border: 1px solid transparent;
+    padding: 0.4rem 1rem;
+	border-radius: 0.1875rem;
+	width: 500px;
+	margin-left: calc(50% - 250px);
+	margin-top: 10px;
+}
+.meldingInfo {
+	background: #2196F3;
+}
+.meldingWarning {
+	background: #FF6258;
+}
+.openChat {
+	cursor: pointer;
+}
