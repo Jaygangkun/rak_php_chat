@@ -75,7 +75,7 @@
                     </div>
                   </div>
                   <div class="form-group">
-                    <button class="btn btn-primary submit-btn" id="loginButton">SIGN IN</button>
+                    <input type="button" class="btn btn-primary" id="loginButton" value="SIGN IN"></input>
                   </div>
                  
                 </form>

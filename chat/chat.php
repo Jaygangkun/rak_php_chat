@@ -57,7 +57,7 @@
 						$timemsg = $timemsg.' ago';
 						return $timemsg;
 						}
-						$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId`");
+						$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId` ORDER  BY memberRoomId DESC");
 						while($roomMemberData = mysqli_fetch_assoc( $getCurrentRooms )) {
 							$getRoomData = mysqli_query($dbConnect, "SELECT `roomName`, `roomImg` FROM `chatRooms` WHERE `roomId` = '".$roomMemberData['memberRoomId']."'");
 							$roomData = mysqli_fetch_assoc( $getRoomData );
@@ -86,6 +86,7 @@
 							<?
 						}
 						?>
+            
 						<div style="display: none;">
                         <div class="list-item">
                           <div class="profile-image">
@@ -134,7 +135,7 @@
 						</div>
                       </div>
                       <div class="sidebar-spacer">
-                        <button class="btn btn-block btn-success py-3" type="button">+ New Chat</button>
+                        <button class="btn btn-block btn-success py-3" type="button" data-toggle="modal" data-target="#newChatRoomModal">+ New Chat</button>
                       </div>
                     </div>
                     <div class="col-lg-6 col-md-8 px-0 d-flex flex-column">
@@ -212,3 +213,71 @@
                 </div>
               </div>
             </div>
+    <div class="modal fade" id="newChatRoomModal" tabindex="-1" role="dialog" aria-labelledby="newChatRoomModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="newChatRoomModalLabel">New Chat</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+                  <div class="input-group">
+                      <input type="text" class="form-control" placeholder="Room Name" id="chatRoomName">
+                  </div>
+                  <div class="error mt-2 text-danger" for="chatRoomName" id="chatRoomError" style="display: none">Please Input Room Name</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="btn_create_room">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
+<script>
+  jQuery(document).on('click', '#btn_create_room', function(){
+
+    if(jQuery('#chatRoomName').val() == ''){
+      jQuery('#chatRoomError').show();
+      return;
+    }
+    else{
+      jQuery('#chatRoomError').hide();
+    }
+    
+    jQuery.post('js/newChatRoom.php', {roomName: jQuery('#chatRoomName').val()}, function(response) {
+      response = JSON.parse(response);
+      if(response.success) {
+
+        var newRoomHtml = '<div class="list-item openChat" id="' + response.roomId + '">';
+        newRoomHtml = newRoomHtml + '<div class="profile-image">';
+        newRoomHtml = newRoomHtml + '<div class="dot-indicator sm bg-success"></div>';
+        newRoomHtml = newRoomHtml + '<img class="img-sm rounded-circle" src="assets/images/faces/c.png"></img>';
+        newRoomHtml = newRoomHtml + '</div>';
+        newRoomHtml = newRoomHtml + '<p class="user-name">' + jQuery('#chatRoomName').val() + '</p>';
+        newRoomHtml = newRoomHtml + '<p class="chat-time">';
+        newRoomHtml = newRoomHtml + '<i class="mdi mdi-window-close btn-outline-danger closeRoom" id="' + response.roomId + '"></i>';
+        newRoomHtml = newRoomHtml + '        </p>';
+        newRoomHtml = newRoomHtml + '<p class="chat-text">No recent messages</p></div>';
+
+        jQuery('#currentRooms').prepend(newRoomHtml);
+
+        jQuery('#newChatRoomModal').modal('toggle');
+
+        swal({
+          title: '',
+          text: 'Created Successfully!',
+          icon: 'success',
+          button: {
+            text: "OK",
+            value: true,
+            visible: true,
+            className: "btn btn-primary"
+          }
+        })
+      }
+    });
+  })
+  </script>

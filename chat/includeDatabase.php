@@ -1,8 +1,8 @@
 <?php
 
 $dbUser = "root";
-$dbPass = 'flamingo';
-$dbHost = "195.201.99.166";
+$dbPass = 'root';
+$dbHost = "localhost";
 $dbName = "chat";
 
 $dbConnect = mysqli_connect($dbHost, $dbUser, $dbPass, $dbName)

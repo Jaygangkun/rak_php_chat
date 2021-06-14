@@ -1,13 +1,13 @@
-<?
+<?php
 ini_set('session.gc_maxlifetime', 30*60);
 session_start();
 include('includeDatabase.php');
 
 if(!isset($_SESSION['chatUserId']) || empty($_SESSION['chatUserId'])) {
-	header("Location: https://195.201.99.166/chat/login.php");
+	header("Location: https://localhost:8903/chat/login.php");
 }
 $lastMessageId = 0;
-$getUserData = mysqli_query($dbConnect, "SELECT `userName`, `userId`, `userEmail` FROM `bmwUsers` WHERE `userId` = '".$_SESSION['chatUserId']."'");
+$getUserData = mysqli_query($dbConnect, "SELECT * FROM `bmwUsers` WHERE `userId` = '".$_SESSION['chatUserId']."'");
 $userData = mysqli_fetch_assoc( $getUserData );
 if(isset($_GET['roomId']) && !empty($_GET['roomId'])) {
 	$roomId = mysqli_real_escape_string( $dbConnect, $_GET['roomId'] );
@@ -28,13 +28,14 @@ else {
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<base href="http://195.201.99.166/chat/">
+	<base href="http://localhost:8903/chat/">
     <title>UOWD Chat</title>
     <!-- plugins:css -->
     <link rel="stylesheet" href="assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="assets/vendors/flag-icon-css/css/flag-icon.min.css">
     <link rel="stylesheet" href="assets/vendors/ti-icons/css/themify-icons.css">
     <link rel="stylesheet" href="assets/vendors/typicons/typicons.css">
+	<link rel="stylesheet" href="assets/vendors/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet" href="assets/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="style.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -71,6 +72,9 @@ else {
 			jQuery("#sendChat").keypress(function(e) {
 				if(e.which == 13) {
 					var thisMessage = jQuery(this).val();
+					if(thisMessage == ''){
+						return;
+					}
 					jQuery("#sendChat").val('');
 					jQuery.post('js/sendChat.php', {roomId: currentChatRoomId, sendMessage: thisMessage}, function(sendData) {
 						jQuery("#chatRoom").append('<div class="chat-bubble outgoing-chat"><div class="chat-message"><p>' + thisMessage + '</p></div></div>');
@@ -82,6 +86,9 @@ else {
 			});
 			jQuery("#submitChat").click(function() {
 				var thisMessage = jQuery("#sendChat").val();
+				if(thisMessage == ''){
+					return;
+				}
 				jQuery("#sendChat").val('');
 				jQuery.post('js/sendChat.php', {roomId: currentChatRoomId, sendMessage: thisMessage}, function(sendData) {
 					jQuery("#chatRoom").append('<div class="chat-bubble outgoing-chat"><div class="chat-message"><p>' + thisMessage + '</p></div></div>');
@@ -90,7 +97,7 @@ else {
 					}, 1000);
 				});
 			})
-			jQuery(".openChat").click(function() {
+			jQuery(document).on('click', ".openChat", function() {
 				if(canOpenChat == 1) {
 					var thisRoomId = jQuery(this).attr('id');
 					window.location.href = "/chat/room/" + thisRoomId + "/";
@@ -159,6 +166,21 @@ else {
 				});
 			}, "json");
 		}, 1000);
+
+		window.setInterval(function(){
+			jQuery.post('js/checkNotifications.php', {roomId: currentChatRoomId}, function(response) {
+				console.log(response);
+				if(response.success){
+					jQuery('.notification-area').html('<div class="alert alert-danger" role="alert">' + response.message + '</div>')
+					jQuery('.notification-area').show();
+				}
+				else{
+					jQuery('.notification-area').hide();
+				}
+
+				
+			}, "json");
+		}, 1000);
 	</script>
     <!-- endinject -->
     <!-- Plugin css for this page -->
@@ -180,7 +202,7 @@ else {
 			UOWD Chat
             <img src="assets/images/logo.svg" alt="logo" style="display: none;" /> </a>
           <a class="navbar-brand brand-logo-mini" href="/chat/">
-            <img src="assets/images/faces/face8.jpg" alt="logo" /> </a>
+            <img src="<?php echo $userData['profile']?>" alt="logo" /> </a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center">
           <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -199,6 +221,17 @@ else {
                 
               </a>
             </li>
+			<?php
+			if($userData['userTeacher'] == '1' && $roomId != 0){
+				?>
+				<li class="nav-item dropdown">
+					<span class="nav-link" data-toggle="modal" data-target="#setNotificationModal">
+						<i class="fa fa-warning"></i>
+					</span>
+				</li>
+				<?php
+			}
+			?>
 			 <li class="nav-item dropdown">
               <a class="nav-link count-indicator aside-toggler" id="openAllChats" href="javascript:void(0);" aria-expanded="false">
                 <i class="mdi mdi-chat-processing"></i>
@@ -208,14 +241,14 @@ else {
             
             <li class="nav-item dropdown d-none d-xl-inline-block user-dropdown">
               <a class="nav-link dropdown-toggle" id="UserDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
-                <img class="img-xs rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image"> </a>
+                <img class="img-xs rounded-circle" src="<?php echo $userData['profile']?>" alt="Profile image"> </a>
               <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
                 <div class="dropdown-header text-center">
-                  <img class="img-md rounded-circle" src="assets/images/faces/face8.jpg" alt="Profile image">
+                  <img class="img-md rounded-circle" src="<?php echo $userData['profile']?>" alt="Profile image">
                   <p class="mb-1 mt-3 font-weight-semibold"><? echo $userData['userName']; ?></p>
                   <p class="font-weight-light text-muted mb-0"><? echo $userData['userEmail']; ?></p>
                 </div>
-                <a class="dropdown-item"><i class="dropdown-item-icon mdi mdi-account-outline text-primary"></i> My Profile</a>
+                <a class="dropdown-item" href="profile/"><i class="dropdown-item-icon mdi mdi-account-outline text-primary"></i> My Profile</a>
                 <a class="dropdown-item" href="logout.php"><i class="dropdown-item-icon mdi mdi-power text-primary"></i>Sign Out</a>
               </div>
             </li>
@@ -231,17 +264,17 @@ else {
         <div class="right-sidebar-toggler-wrapper" style="display: none;">
           <div class="sidebar-toggler" id="layout-toggler"><i class="mdi mdi-settings"></i></div>
           <div class="sidebar-toggler" id="chat-toggler"><i class="mdi mdi-chat-processing"></i></div>
-          <div class="sidebar-toggler"><a href="http://195.201.99.166/chat/dashboard/" target="_blank"><i class="mdi mdi-file-document-outline"></i></a></div>
-          <div class="sidebar-toggler"><a href="http://195.201.99.166/chat/dashboard/" target="_blank"><i class="mdi mdi-cart"></i></a></div>
+          <div class="sidebar-toggler"><a href="http://localhost:8903/chat/dashboard/" target="_blank"><i class="mdi mdi-file-document-outline"></i></a></div>
+          <div class="sidebar-toggler"><a href="http://localhost:8903/chat/dashboard/" target="_blank"><i class="mdi mdi-cart"></i></a></div>
         </div>
         <!-- partial -->
         <!-- partial:../../partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
           <ul class="nav">
             <li class="nav-item nav-profile">
-              <a href="#" class="nav-link">
+              <a href="profile/" class="nav-link">
                 <div class="profile-image">
-                  <img class="img-xs rounded-circle" src="assets/images/faces/face8.jpg" alt="profile image">
+                  <img class="img-xs rounded-circle" src="<?php echo $userData['profile']?>" alt="profile image">
                   <div class="dot-indicator bg-success"></div>
                 </div>
                 <div class="text-wrapper">
@@ -257,23 +290,46 @@ else {
                 <span class="menu-title">Dashboard</span>
               </a>
             </li>
+			<?php
+			$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId` ORDER  BY memberRoomId DESC");
+			$roomMemberData = mysqli_fetch_assoc( $getCurrentRooms );
+			?>
             <li class="nav-item">
-              <a class="nav-link" href="/chat/">
+              <a class="nav-link" href="/chat/room/<?php echo $roomMemberData['memberRoomId']?>/">
                 <i class="menu-icon typcn typcn-mail"></i>
                 <span class="menu-title">Chat</span>
               </a>
             </li>
-			<li class="nav-item">
-              <a class="nav-link" href="admin/">
-                <i class="menu-icon typcn typcn-mail"></i>
-                <span class="menu-title">Admin</span>
-              </a>
-            </li>
+			<?php
+			if($userData['userAdmin'] == '1'){
+				?>
+				<li class="nav-item">
+					<a class="nav-link" href="admin/">
+						<i class="menu-icon typcn typcn-mail"></i>
+						<span class="menu-title">Admin</span>
+					</a>
+					</li>
+				<?php
+			}
+			?>
+			<?php
+			if($userData['userTeacher'] == '1'){
+				?>
+				<li class="nav-item">
+					<a class="nav-link" href="teacher/">
+						<i class="menu-icon typcn typcn-mail"></i>
+						<span class="menu-title">Teacher</span>
+					</a>
+					</li>
+				<?php
+			}
+			?>
           </ul>
         </nav>
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
+			  <div class="notification-area" style="display: none"></div>
             <?
 			if(isset($_GET['page']) && !empty($_GET['page']) && isset($_GET['sub']) && !empty($_GET['sub'])) {
 				$_GET['page'] = str_replace(".php", "", $_GET['page']);
@@ -324,5 +380,52 @@ else {
     <!-- endinject -->
     <!-- Custom js for this page -->
     <!-- End custom js for this page -->
+		<div class="modal fade" id="setNotificationModal" tabindex="-1" role="dialog" aria-labelledby="setNotificationModal" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+		<div class="modal-header">
+			<div>
+			<h5 class="modal-title" id="setNotificationModal">Set Notification</h5>
+			
+		</div>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+					<div class="input-group">
+						<textarea class="form-control" id="notificationText" value=""></textarea>
+					</div>
+		</div>
+		<div class="modal-footer">
+		<small style="position: absolute; left: 31px;">Keep empty to clear the alert, or enter text to set it</small><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			<button type="button" class="btn btn-primary" id="btn_set_notification" roomId="<?php echo $roomId?>">Set</button>
+		</div>
+		</div>
+	</div>
+	</div>
+	<script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
+	<script>
+		jQuery(document).on('click', '#btn_set_notification', function(){
+			jQuery.post('js/setNotifications.php', {roomId: jQuery(this).attr('roomId'), message: jQuery('#notificationText').val()}, function(response) {
+				response = JSON.parse(response);
+				if(response.success) {
+					jQuery('#setNotificationModal').modal('toggle');
+					
+					swal({
+						title: '',
+						text: 'Done Successfully!',
+						icon: 'success',
+						button: {
+							text: "OK",
+							value: true,
+							visible: true,
+							className: "btn btn-primary"
+						}
+						})
+				}
+			});
+		})
+	</script>
   </body>
 </html>
