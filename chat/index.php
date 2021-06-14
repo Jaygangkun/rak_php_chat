@@ -332,6 +332,10 @@ else {
 						<i class="fa fa-warning"></i>
 					</span>
 				</li>
+			<?php
+			}
+			if($roomId != 0){
+			?>
 				<li class="nav-item dropdown">
               <a class="nav-link count-indicator aside-toggler" id="openAllChats" href="javascript:void(0);" aria-expanded="false">
                 <i class="mdi mdi-chat-processing"></i>
