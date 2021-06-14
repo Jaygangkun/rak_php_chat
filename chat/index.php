@@ -6,6 +6,80 @@ include('includeDatabase.php');
 if(!isset($_SESSION['chatUserId']) || empty($_SESSION['chatUserId'])) {
 	header("Location: https://localhost:8903/chat/login.php");
 }
+
+$profile_submit_error = false;
+if(isset($_POST['submit_profile']) && empty($_POST['email'])) {
+	$profile_submit_error = true;
+}
+else if(isset($_POST['submit_profile']) && !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
+	$profile_submit_error = true;
+}
+else if(isset($_POST['submit_profile']) && filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
+	$domain = array_pop(explode('@', $_POST['email']));
+	if($domain != 'uowmail.edu.au'){
+		$profile_submit_error = true;
+	}
+}
+
+if(isset($_POST['submit_profile']) && empty($_POST['password'])) {
+	$profile_submit_error = true;
+}
+
+if(isset($_POST['submit_profile']) && empty($_POST['confirm_password'])) {
+	$profile_submit_error = true;
+}
+
+if(isset($_POST['submit_profile']) && isset($_POST['password']) && isset($_POST['confirm_password']) && $_POST['password'] !="" && $_POST['confirm_password'] != "" && $_POST['password'] != $_POST['confirm_password']) {
+	$profile_submit_error = true;
+}
+
+$profile_img = '';
+$update_profile = true;
+if(isset($_POST['submit_profile']) && isset($_FILES['profile_file']) && $_FILES['profile_file']['name'] != ''){
+	//upload identification image
+	$filename = 'avatar-'.$_SESSION['chatUserId'];
+	
+	move_uploaded_file($_FILES['profile_file']['tmp_name'], __DIR__.'/profiles/'.$filename);
+	$profile_img = 'profiles/'.$filename;
+	$update_profile = true;
+}
+else{
+	$update_profile = false;
+}
+
+if(isset($_POST['submit_profile']) && !$profile_submit_error){
+	$email = mysqli_real_escape_string( $dbConnect, $_POST['email'] );
+	$password = mysqli_real_escape_string( $dbConnect, $_POST['password'] );
+	$firstname = mysqli_real_escape_string( $dbConnect, $_POST['firstname'] );
+	$lastname = mysqli_real_escape_string( $dbConnect, $_POST['lastname'] );
+	$profile = $profile_img;
+
+	if($update_profile){
+		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userEmail='".$email."', userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."', profile='".$profile."' WHERE userId='".$_SESSION['chatUserId']."'");
+	}
+	else{
+		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userEmail='".$email."', userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."' WHERE userId='".$_SESSION['chatUserId']."'");
+	}
+	
+	if($result){
+	?>
+	<script>
+		swal({
+		title: '',
+		text: 'Success!',
+		icon: 'success',
+		button: {
+			text: "OK",
+			value: true,
+			visible: true,
+			className: "btn btn-primary"
+		}
+		})
+	</script>
+	<?php
+	}
+}
+
 $lastMessageId = 0;
 $getUserData = mysqli_query($dbConnect, "SELECT * FROM `bmwUsers` WHERE `userId` = '".$_SESSION['chatUserId']."'");
 $userData = mysqli_fetch_assoc( $getUserData );
@@ -21,6 +95,10 @@ else {
 	$roomId = 0;
 	$lastMessageId = 0;
 }
+
+$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId` ORDER  BY memberRoomId DESC");
+$roomMemberData = mysqli_fetch_assoc( $getCurrentRooms );
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -198,11 +276,11 @@ else {
       <!-- partial:../../partials/_navbar.html -->
       <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
         <div class="text-center navbar-brand-wrapper d-flex align-items-top justify-content-center">
-          <a class="navbar-brand brand-logo" href="/chat/">
+          <a class="navbar-brand brand-logo" href="/chat/room/<?php echo $roomMemberData['memberRoomId']?>/">
 			UOWD Chat
             <img src="assets/images/logo.svg" alt="logo" style="display: none;" /> </a>
-          <a class="navbar-brand brand-logo-mini" href="/chat/">
-            <img src="<?php echo $userData['profile']?>" alt="logo" /> </a>
+          <a class="navbar-brand brand-logo-mini" href="/chat/room/<?php echo $roomMemberData['memberRoomId']?>/">
+            <img src="<?php echo ($userData['profile'] != null && $userData['profile'] != '') ? $userData['profile']."?v=".time() : 'assets/images/avatar-default.png'?>" alt="logo" /> </a>
         </div>
         <div class="navbar-menu-wrapper d-flex align-items-center">
           <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
@@ -222,29 +300,30 @@ else {
               </a>
             </li>
 			<?php
-			if($userData['userTeacher'] == '1' && $roomId != 0){
+			if(($userData['userTeacher'] == '1' || $userData['userAdmin'] == '1') && $roomId != 0){
 				?>
 				<li class="nav-item dropdown">
 					<span class="nav-link" data-toggle="modal" data-target="#setNotificationModal">
 						<i class="fa fa-warning"></i>
 					</span>
 				</li>
-				<?php
-			}
-			?>
-			 <li class="nav-item dropdown">
+				<li class="nav-item dropdown">
               <a class="nav-link count-indicator aside-toggler" id="openAllChats" href="javascript:void(0);" aria-expanded="false">
                 <i class="mdi mdi-chat-processing"></i>
                 
               </a>
             </li>
+				<?php
+			}
+			?>
+			 
             
             <li class="nav-item dropdown d-none d-xl-inline-block user-dropdown">
               <a class="nav-link dropdown-toggle" id="UserDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
-                <img class="img-xs rounded-circle" src="<?php echo $userData['profile']?>" alt="Profile image"> </a>
+                <img class="img-xs rounded-circle" src="<?php echo ($userData['profile'] != null && $userData['profile'] != '') ? $userData['profile']."?v=".time() : 'assets/images/avatar-default.png'?>" alt="Profile image"> </a>
               <div class="dropdown-menu dropdown-menu-right navbar-dropdown" aria-labelledby="UserDropdown">
                 <div class="dropdown-header text-center">
-                  <img class="img-md rounded-circle" src="<?php echo $userData['profile']?>" alt="Profile image">
+                  <img class="img-md rounded-circle" src="<?php echo ($userData['profile'] != null && $userData['profile'] != '') ? $userData['profile']."?v=".time() : 'assets/images/avatar-default.png'?>" alt="Profile image">
                   <p class="mb-1 mt-3 font-weight-semibold"><? echo $userData['userName']; ?></p>
                   <p class="font-weight-light text-muted mb-0"><? echo $userData['userEmail']; ?></p>
                 </div>
@@ -274,7 +353,7 @@ else {
             <li class="nav-item nav-profile">
               <a href="profile/" class="nav-link">
                 <div class="profile-image">
-                  <img class="img-xs rounded-circle" src="<?php echo $userData['profile']?>" alt="profile image">
+                  <img class="img-xs rounded-circle" src="<?php echo ($userData['profile'] != null && $userData['profile'] != '') ? $userData['profile']."?v=".time() : 'assets/images/avatar-default.png'?>" alt="profile image">
                   <div class="dot-indicator bg-success"></div>
                 </div>
                 <div class="text-wrapper">
@@ -290,10 +369,7 @@ else {
                 <span class="menu-title">Dashboard</span>
               </a>
             </li>
-			<?php
-			$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId` ORDER  BY memberRoomId DESC");
-			$roomMemberData = mysqli_fetch_assoc( $getCurrentRooms );
-			?>
+			
             <li class="nav-item">
               <a class="nav-link" href="/chat/room/<?php echo $roomMemberData['memberRoomId']?>/">
                 <i class="menu-icon typcn typcn-mail"></i>
@@ -386,7 +462,7 @@ else {
 		<div class="modal-header">
 			<div>
 			<h5 class="modal-title" id="setNotificationModal">Set Notification</h5>
-			
+			<small>Keep empty to clear the alert, or enter text to set it</small>
 		</div>
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 			<span aria-hidden="true">&times;</span>
@@ -398,7 +474,7 @@ else {
 					</div>
 		</div>
 		<div class="modal-footer">
-		<small style="position: absolute; left: 31px;">Keep empty to clear the alert, or enter text to set it</small><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 			<button type="button" class="btn btn-primary" id="btn_set_notification" roomId="<?php echo $roomId?>">Set</button>
 		</div>
 		</div>

@@ -20,12 +20,11 @@
 
 .profile-avatar__img{
 	border-radius: 50%;
-	width: 150px;
-	height: 150px;
+	width: 100px;
+	height: 100px;
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-position: center;
-	border: 1px solid black;
 	display: flex;
 	align-items: center;
 	justify-content: center;
