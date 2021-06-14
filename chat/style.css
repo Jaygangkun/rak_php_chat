@@ -37,3 +37,19 @@
 .profile-avatar__img span{
 	display: none;
 }
+
+.chat-room-offical-icon{
+	width: 15px;
+	margin-left: 10px;
+}
+
+.chat-room-name{
+	display: flex;
+	align-items: center;
+}
+
+.chat-room-name span{
+	max-width: calc(100% - 30px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

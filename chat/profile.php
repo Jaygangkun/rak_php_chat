@@ -8,19 +8,12 @@ $getUserData = mysqli_query($dbConnect, "SELECT * FROM `bmwUsers` WHERE `userId`
 $userData = mysqli_fetch_assoc( $getUserData );
 ?>
 	<?php
-	$username = '';
 	$firstname = '';
 	$lastname = '';
-	$email = '';
 	$password = '';
-	$confirm_password = '';
 	$profile = null;
 	// $profile_img = '';
 	if(isset($_POST['submit_profile'])){
-		if(isset($_POST['username'])){
-			$username = $_POST['username'];
-		}
-
 		if(isset($_POST['firstname'])){
 			$firstname = $_POST['firstname'];
 		}
@@ -29,10 +22,6 @@ $userData = mysqli_fetch_assoc( $getUserData );
 			$lastname = $_POST['lastname'];
 		}
 
-		if(isset($_POST['email'])){
-			$email = $_POST['email'];
-		}
-		
 
 		// if(isset($_FILES['profile_file']) && $_FILES['profile_file']['name'] != ''){
 		// 	//upload identification image
@@ -47,10 +36,8 @@ $userData = mysqli_fetch_assoc( $getUserData );
 		$profile_img = $userData['profile'];
 	}
 	else{
-		$username = $userData['userName'];
 		$firstname = $userData['firstName'];
 		$lastname = $userData['lastName'];
-		$email = $userData['userEmail'];
 		$profile_img = $userData['profile'];
 	}
 	
@@ -80,39 +67,6 @@ $userData = mysqli_fetch_assoc( $getUserData );
 												<i class="mdi mdi-account-outline"></i>
 												</span>
 											</div>
-											<input type="text" name="email" class="form-control" placeholder="Email" value="<?php echo $email ?>">
-										</div>
-										<?php
-											if(isset($_POST['submit_profile']) && empty($_POST['email'])) {
-											  $submit_error = true;
-											  ?>
-										    <div class="error mt-2 text-danger" for="email">Please fill in your email</div>
-										<?php
-											}
-											else if(isset($_POST['submit_profile']) && !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
-												$submit_error = true;
-												?>
-												<div class="error mt-2 text-danger" for="email">Please fill in correct email format</div>
-												<?php
-											}
-											else if(isset($_POST['submit_profile']) && filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
-												$domain = array_pop(explode('@', $_POST['email']));
-												if($domain != 'uowmail.edu.au'){
-												$submit_error = true;
-												?>
-												<div class="error mt-2 text-danger" for="email">This domain doesn't allow to reigster</div>
-												<?php
-												}
-											}
-											?>
-									</div>
-									<div class="form-group">
-										<div class="input-group">
-											<div class="input-group-prepend">
-												<span class="input-group-text">
-												<i class="mdi mdi-account-outline"></i>
-												</span>
-											</div>
 											<input type="text" name="firstname" class="form-control" placeholder="First Name" value="<?php echo $firstname?>">
 										</div>
 									</div>
@@ -130,7 +84,7 @@ $userData = mysqli_fetch_assoc( $getUserData );
 										<div class="input-group">
 											<div class="input-group-prepend">
 												<span class="input-group-text">
-												<i class="mdi mdi-lock-outline"></i>
+												<i class="mdi mdi-lock-outline"></i><span style="color: red;margin-left: 5px;">*</span>
 												</span>
 											</div>
 											<input type="password" name="password" class="form-control" placeholder="Password" value="<?php echo isset($_POST['password']) ? $_POST['password'] : "" ?>">
@@ -140,30 +94,6 @@ $userData = mysqli_fetch_assoc( $getUserData );
 											  $submit_error = true;
 											  ?>
 										    <div class="error mt-2 text-danger" for="password">Please fill in your password</div>
-										<?php
-											}
-											?>
-									</div>
-									<div class="form-group">
-										<div class="input-group">
-											<div class="input-group-prepend">
-												<span class="input-group-text">
-												<i class="mdi mdi-lock-outline"></i>
-												</span>
-											</div>
-											<input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" value="<?php echo isset($_POST['confirm_password']) ? $_POST['confirm_password'] : "" ?>">
-										</div>
-										<?php
-											if(isset($_POST['submit_profile']) && empty($_POST['confirm_password'])) {
-											  $submit_error = true;
-											  ?>
-										    <div class="error mt-2 text-danger" for="confirm_password">Please fill in your confirm password</div>
-										<?php
-											}
-											if(isset($_POST['submit_profile']) && isset($_POST['password']) && isset($_POST['confirm_password']) && $_POST['password'] !="" && $_POST['confirm_password'] != "" && $_POST['password'] != $_POST['confirm_password']) {
-											  $submit_error = true;
-											  ?>
-										    <div class="error mt-2 text-danger" for="confirm_password">Passwords don't match</div>
 										<?php
 											}
 											?>

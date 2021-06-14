@@ -6,7 +6,7 @@ include('../includeDatabase.php');
 
 if(isset($_POST['roomName']) && !empty($_POST['roomName'])) {
 	$roomName = mysqli_real_escape_string( $dbConnect, $_POST['roomName'] );
-	$result = mysqli_query($dbConnect, "INSERT INTO chatrooms(roomName, roomImg) VALUES('".$roomName."', 'assets/images/faces/c.png')");
+	$result = mysqli_query($dbConnect, "INSERT INTO chatrooms(roomName, roomImg, customRoom) VALUES('".$roomName."', 'assets/images/faces/c.png', '1')");
 	if($result) {
 		$room_id = mysqli_insert_id($dbConnect);
 		$users = mysqli_query($dbConnect, "SELECT * FROM bmwusers");

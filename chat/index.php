@@ -8,28 +8,8 @@ if(!isset($_SESSION['chatUserId']) || empty($_SESSION['chatUserId'])) {
 }
 
 $profile_submit_error = false;
-if(isset($_POST['submit_profile']) && empty($_POST['email'])) {
-	$profile_submit_error = true;
-}
-else if(isset($_POST['submit_profile']) && !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
-	$profile_submit_error = true;
-}
-else if(isset($_POST['submit_profile']) && filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
-	$domain = array_pop(explode('@', $_POST['email']));
-	if($domain != 'uowmail.edu.au'){
-		$profile_submit_error = true;
-	}
-}
 
 if(isset($_POST['submit_profile']) && empty($_POST['password'])) {
-	$profile_submit_error = true;
-}
-
-if(isset($_POST['submit_profile']) && empty($_POST['confirm_password'])) {
-	$profile_submit_error = true;
-}
-
-if(isset($_POST['submit_profile']) && isset($_POST['password']) && isset($_POST['confirm_password']) && $_POST['password'] !="" && $_POST['confirm_password'] != "" && $_POST['password'] != $_POST['confirm_password']) {
 	$profile_submit_error = true;
 }
 
@@ -48,17 +28,16 @@ else{
 }
 
 if(isset($_POST['submit_profile']) && !$profile_submit_error){
-	$email = mysqli_real_escape_string( $dbConnect, $_POST['email'] );
 	$password = mysqli_real_escape_string( $dbConnect, $_POST['password'] );
 	$firstname = mysqli_real_escape_string( $dbConnect, $_POST['firstname'] );
 	$lastname = mysqli_real_escape_string( $dbConnect, $_POST['lastname'] );
 	$profile = $profile_img;
 
 	if($update_profile){
-		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userEmail='".$email."', userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."', profile='".$profile."' WHERE userId='".$_SESSION['chatUserId']."'");
+		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."', profile='".$profile."' WHERE userId='".$_SESSION['chatUserId']."'");
 	}
 	else{
-		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userEmail='".$email."', userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."' WHERE userId='".$_SESSION['chatUserId']."'");
+		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."' WHERE userId='".$_SESSION['chatUserId']."'");
 	}
 	
 	if($result){
@@ -80,6 +59,41 @@ if(isset($_POST['submit_profile']) && !$profile_submit_error){
 	}
 }
 
+if(isset($_GET['page']) && !empty($_GET['page']) && isset($_GET['sub']) && !empty($_GET['sub'])) {
+	$_GET['page'] = str_replace(".php", "", $_GET['page']);
+	if(file_exists($_GET['sub'] . '/' . $_GET['page'] . '.php')) {
+		$loadSubPage = $_GET['sub'];
+		$loadPage = $_GET['page'];
+	}
+	else {
+		$loadPage = "chat";
+	}
+}
+elseif(isset($_GET['page']) && !empty($_GET['page'])) {
+	$_GET['page'] = str_replace(".php", "", $_GET['page']);
+	if(file_exists($_GET['page'] . '.php')) {
+		$loadPage = $_GET['page'];
+	}
+	else {
+		$loadPage = "chat";
+	}
+}
+else {
+	$loadPage = "chat";
+}
+
+
+$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId` ORDER  BY memberRoomId DESC");
+// $roomMemberData = mysqli_fetch_assoc( $getCurrentRooms );
+
+while($roomMemberData = mysqli_fetch_assoc( $getCurrentRooms )) {
+	$getRoomData = mysqli_query($dbConnect, "SELECT * FROM `chatRooms` WHERE `roomId` = '".$roomMemberData['memberRoomId']."'");
+	if(mysqli_num_rows( $getRoomData ) == 0){
+		continue;
+	}
+	break;
+}
+
 $lastMessageId = 0;
 $getUserData = mysqli_query($dbConnect, "SELECT * FROM `bmwUsers` WHERE `userId` = '".$_SESSION['chatUserId']."'");
 $userData = mysqli_fetch_assoc( $getUserData );
@@ -94,10 +108,13 @@ if(isset($_GET['roomId']) && !empty($_GET['roomId'])) {
 else {
 	$roomId = 0;
 	$lastMessageId = 0;
+
+	if($loadPage == 'chat'){
+		$roomId = $roomMemberData['memberRoomId'];
+	}
+	
 }
 
-$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId` ORDER  BY memberRoomId DESC");
-$roomMemberData = mysqli_fetch_assoc( $getCurrentRooms );
 
 ?>
 <!DOCTYPE html>
@@ -143,7 +160,12 @@ $roomMemberData = mysqli_fetch_assoc( $getCurrentRooms );
 					jQuery("#newRooms").show();
 					jQuery("#newRooms").html("");
 					searchData.forEach(function(roomData) {
-						jQuery("#newRooms").append('<div class="list-item"><div class="profile-image"><img class="img-sm rounded-circle" src="' + roomData[2] + '"></img></div><p class="user-name">' + roomData[1] + '</p><p class="chat-time">' + roomData[3] + ' members</p><p class="chat-text"><button type="button" class="btn btn-outline-primary btn-fw addRoom" id="' + roomData[0] + '"><i class="mdi mdi-plus"></i>Join Room</button></p></div>');
+						if(roomData[4] == '0'){
+							jQuery("#newRooms").append('<div class="list-item"><div class="profile-image"><img class="img-sm rounded-circle" src="' + roomData[2] + '"></img></div><p class="user-name chat-room-name"><span>' + roomData[1] + '</span><img class="chat-room-offical-icon" src="assets/images/icon-official.svg"></p></p><p class="chat-time">' + roomData[3] + ' members</p><p class="chat-text"><button type="button" class="btn btn-outline-primary btn-fw addRoom" id="' + roomData[0] + '"><i class="mdi mdi-plus"></i>Join Room</button></p></div>');
+						}
+						else{
+							jQuery("#newRooms").append('<div class="list-item"><div class="profile-image"><img class="img-sm rounded-circle" src="' + roomData[2] + '"></img></div><p class="user-name chat-room-name"><span>' + roomData[1] + '</span></p></p><p class="chat-time">' + roomData[3] + ' members</p><p class="chat-text"><button type="button" class="btn btn-outline-primary btn-fw addRoom" id="' + roomData[0] + '"><i class="mdi mdi-plus"></i>Join Room</button></p></div>');
+						}
 					});
 				}, "json");
 			});
@@ -388,47 +410,23 @@ $roomMemberData = mysqli_fetch_assoc( $getCurrentRooms );
 				<?php
 			}
 			?>
-			<?php
-			if($userData['userTeacher'] == '1'){
-				?>
-				<li class="nav-item">
-					<a class="nav-link" href="teacher/">
-						<i class="menu-icon typcn typcn-mail"></i>
-						<span class="menu-title">Teacher</span>
-					</a>
-					</li>
-				<?php
-			}
-			?>
+			
           </ul>
+		  <ul class="nav" style="position: absolute; bottom: 0px;">
+				<li class="nav-item">
+					<a class="nav-link" href="logout.php">
+					<i class="menu-icon typcn typcn-mail"></i>
+					<span class="menu-title">Logout</span>
+					</a>
+				</li>
+		</ul>
+		  
         </nav>
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
 			  <div class="notification-area" style="display: none"></div>
             <?
-			if(isset($_GET['page']) && !empty($_GET['page']) && isset($_GET['sub']) && !empty($_GET['sub'])) {
-				$_GET['page'] = str_replace(".php", "", $_GET['page']);
-				if(file_exists($_GET['sub'] . '/' . $_GET['page'] . '.php')) {
-					$loadSubPage = $_GET['sub'];
-					$loadPage = $_GET['page'];
-				}
-				else {
-					$loadPage = "chat";
-				}
-			}
-			elseif(isset($_GET['page']) && !empty($_GET['page'])) {
-				$_GET['page'] = str_replace(".php", "", $_GET['page']);
-				if(file_exists($_GET['page'] . '.php')) {
-					$loadPage = $_GET['page'];
-				}
-				else {
-					$loadPage = "chat";
-				}
-			}
-			else {
-				$loadPage = "chat";
-			}
 			require($loadPage . '.php');
 			?>
           </div>

@@ -59,7 +59,10 @@
 						}
 						$getCurrentRooms = mysqli_query($dbConnect, "SELECT `memberRoomId` FROM `roomMembers` WHERE `memberUserId` = '".$_SESSION['chatUserId']."' GROUP BY `memberRoomId` ORDER  BY memberRoomId DESC");
 						while($roomMemberData = mysqli_fetch_assoc( $getCurrentRooms )) {
-							$getRoomData = mysqli_query($dbConnect, "SELECT `roomName`, `roomImg` FROM `chatRooms` WHERE `roomId` = '".$roomMemberData['memberRoomId']."'");
+							$getRoomData = mysqli_query($dbConnect, "SELECT * FROM `chatRooms` WHERE `roomId` = '".$roomMemberData['memberRoomId']."'");
+              if(mysqli_num_rows( $getRoomData ) == 0){
+                continue;
+              }
 							$roomData = mysqli_fetch_assoc( $getRoomData );
 							$getLastMessage = mysqli_query($dbConnect, "SELECT `messageText`, `messageUserId`, `messageTime` FROM `roomMessages` WHERE `messageRoomId` = '".$roomMemberData['memberRoomId']."' ORDER BY `messageId` DESC");
 							if(mysqli_num_rows( $getLastMessage ) > 0) {
@@ -77,7 +80,14 @@
 									<div class="dot-indicator sm bg-success"></div>
 									<img class="img-sm rounded-circle" src="<? echo $roomData['roomImg']; ?>"></img>
 								</div>
-								<p class="user-name"><? echo $roomData['roomName']; ?></p>
+								<p class="user-name chat-room-name"><span><? echo $roomData['roomName']; ?></span>
+                <?php
+                if($roomData['customRoom'] != '1'){
+                  ?>
+                  <img class="chat-room-offical-icon" src="assets/images/icon-official.svg"></p>
+                  <?php
+                }
+                ?>
 								<p class="chat-time">
 									<i class="mdi mdi-window-close btn-outline-danger closeRoom" id="<? echo $roomMemberData['memberRoomId']; ?>"></i>
 								</p>
@@ -155,7 +165,7 @@
 								$lastMessageUserId = $messagesData['messageUserId'];
 							}
 							else {
-								$getMessageUserData = mysqli_query($dbConnect, "SELECT `userName` FROM `bmwUsers` WHERE `userId` = '".$messagesData['messageUserId']."'");
+								$getMessageUserData = mysqli_query($dbConnect, "SELECT `userName` FROM `bmwusers` WHERE `userId` = '".$messagesData['messageUserId']."'");
 								$messageUserData = mysqli_fetch_assoc( $getMessageUserData );
 								?>
 								<div class="chat-bubble incoming-chat" <?if($lastMessageUserId == $messagesData['messageUserId']) {?>style="margin-top: 2px;"<?}?>>
@@ -256,7 +266,7 @@
         newRoomHtml = newRoomHtml + '<div class="dot-indicator sm bg-success"></div>';
         newRoomHtml = newRoomHtml + '<img class="img-sm rounded-circle" src="assets/images/faces/c.png"></img>';
         newRoomHtml = newRoomHtml + '</div>';
-        newRoomHtml = newRoomHtml + '<p class="user-name">' + jQuery('#chatRoomName').val() + '</p>';
+        newRoomHtml = newRoomHtml + '<p class="user-name chat-room-name"><span>' + jQuery('#chatRoomName').val() + '</span></p>';
         newRoomHtml = newRoomHtml + '<p class="chat-time">';
         newRoomHtml = newRoomHtml + '<i class="mdi mdi-window-close btn-outline-danger closeRoom" id="' + response.roomId + '"></i>';
         newRoomHtml = newRoomHtml + '        </p>';
