@@ -31,7 +31,7 @@
 						<?
 						function timeAgo($timestamp){
 							$datetime1=new DateTime("now");
-							$datetime2=date_create($timestamp);
+							$datetime2=new DateTime("@$timestamp");
 							$diff=date_diff($datetime1, $datetime2);
 							$timemsg='';
 							if($diff->y > 0){
@@ -80,6 +80,7 @@
 									<div class="dot-indicator sm bg-success"></div>
 									<img class="img-sm rounded-circle" src="<? echo $roomData['roomImg']; ?>"></img>
 								</div>
+                <div class="list-item-right">
 								<p class="user-name chat-room-name"><span><? echo $roomData['roomName']; ?></span>
                 <?php
                 if($roomData['customRoom'] != '1'){
@@ -92,6 +93,7 @@
 									<i class="mdi mdi-window-close btn-outline-danger closeRoom" id="<? echo $roomMemberData['memberRoomId']; ?>"></i>
 								</p>
 								<p class="chat-text"><? echo $lastMessage; ?></p>
+                </div>
 							</div>
 							<?
 						}

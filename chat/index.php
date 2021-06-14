@@ -31,13 +31,14 @@ if(isset($_POST['submit_profile']) && !$profile_submit_error){
 	$password = mysqli_real_escape_string( $dbConnect, $_POST['password'] );
 	$firstname = mysqli_real_escape_string( $dbConnect, $_POST['firstname'] );
 	$lastname = mysqli_real_escape_string( $dbConnect, $_POST['lastname'] );
+	$username = $firstname.' '.$lastname;
 	$profile = $profile_img;
 
 	if($update_profile){
-		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."', profile='".$profile."' WHERE userId='".$_SESSION['chatUserId']."'");
+		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userName='".$username."', userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."', profile='".$profile."' WHERE userId='".$_SESSION['chatUserId']."'");
 	}
 	else{
-		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."' WHERE userId='".$_SESSION['chatUserId']."'");
+		$result = mysqli_query($dbConnect, "UPDATE bmwusers SET userName='".$username."', userPass='".md5($password)."', firstName='".$firstname."', lastName='".$lastname."' WHERE userId='".$_SESSION['chatUserId']."'");
 	}
 	
 	if($result){
@@ -110,7 +111,9 @@ else {
 	$lastMessageId = 0;
 
 	if($loadPage == 'chat'){
-		$roomId = $roomMemberData['memberRoomId'];
+		if($roomMemberData){
+			$roomId = $roomMemberData['memberRoomId'];
+		}
 	}
 	
 }
@@ -161,10 +164,10 @@ else {
 					jQuery("#newRooms").html("");
 					searchData.forEach(function(roomData) {
 						if(roomData[4] == '0'){
-							jQuery("#newRooms").append('<div class="list-item"><div class="profile-image"><img class="img-sm rounded-circle" src="' + roomData[2] + '"></img></div><p class="user-name chat-room-name"><span>' + roomData[1] + '</span><img class="chat-room-offical-icon" src="assets/images/icon-official.svg"></p></p><p class="chat-time">' + roomData[3] + ' members</p><p class="chat-text"><button type="button" class="btn btn-outline-primary btn-fw addRoom" id="' + roomData[0] + '"><i class="mdi mdi-plus"></i>Join Room</button></p></div>');
+							jQuery("#newRooms").append('<div class="list-item"><div class="profile-image"><img class="img-sm rounded-circle" src="' + roomData[2] + '"></img></div><div class="list-item-right"><p class="user-name chat-room-name"><span>' + roomData[1] + '</span><img class="chat-room-offical-icon" src="assets/images/icon-official.svg"></p><p class="chat-members">' + roomData[3] + ' members</p><p class="chat-text"><button type="button" class="btn btn-outline-primary btn-fw addRoom" id="' + roomData[0] + '"><i class="mdi mdi-plus"></i>Join Room</button></p></div></div>');
 						}
 						else{
-							jQuery("#newRooms").append('<div class="list-item"><div class="profile-image"><img class="img-sm rounded-circle" src="' + roomData[2] + '"></img></div><p class="user-name chat-room-name"><span>' + roomData[1] + '</span></p></p><p class="chat-time">' + roomData[3] + ' members</p><p class="chat-text"><button type="button" class="btn btn-outline-primary btn-fw addRoom" id="' + roomData[0] + '"><i class="mdi mdi-plus"></i>Join Room</button></p></div>');
+							jQuery("#newRooms").append('<div class="list-item"><div class="profile-image"><img class="img-sm rounded-circle" src="' + roomData[2] + '"></img></div><div class="list-item-right"><p class="user-name chat-room-name"><span>' + roomData[1] + '</span></p><p class="chat-members">' + roomData[3] + ' members</p><p class="chat-text"><button type="button" class="btn btn-outline-primary btn-fw addRoom" id="' + roomData[0] + '"><i class="mdi mdi-plus"></i>Join Room</button></p></div></div>');
 						}
 					});
 				}, "json");
@@ -380,7 +383,19 @@ else {
                 </div>
                 <div class="text-wrapper">
                   <p class="profile-name"><? echo $userData['userName']; ?></p>
-                  <p class="designation">Admin</p>
+                  <p class="designation">
+					  <?php
+					  if($userData['userAdmin'] == '1'){
+						  echo "Admin";
+					  }
+					  else if($userData['userTeacher'] == '1'){
+						echo "Teacher";
+						}
+						else{
+							echo "Student";
+						}
+					  ?>
+				  </p>
                 </div>
               </a>
             </li>
@@ -393,7 +408,7 @@ else {
             </li>
 			
             <li class="nav-item">
-              <a class="nav-link" href="/chat/room/<?php echo $roomMemberData['memberRoomId']?>/">
+              <a class="nav-link" href="/chat/room/<?php echo $roomMemberData ? $roomMemberData['memberRoomId'] : 0?>/">
                 <i class="menu-icon typcn typcn-mail"></i>
                 <span class="menu-title">Chat</span>
               </a>

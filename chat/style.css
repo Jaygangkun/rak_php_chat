@@ -40,7 +40,7 @@
 
 .chat-room-offical-icon{
 	width: 15px;
-	margin-left: 10px;
+	margin-left: 5px;
 }
 
 .chat-room-name{
@@ -52,4 +52,23 @@
 	max-width: calc(100% - 30px);
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.chat-members{
+	padding-left: 20px;
+}
+
+.chat-app-wrapper .chat-list-wrapper .chat-list-item-wrapper .list-item{
+	display: flex !important;
+}
+
+.list-item-right{
+	position: relative;
+	flex-grow: 1;
+}
+
+.chat-app-wrapper .chat-list-wrapper .chat-list-item-wrapper .list-item .chat-time{
+	position: absolute;
+	right: 0px;
+	top: 0px;
 }

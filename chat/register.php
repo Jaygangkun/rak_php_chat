@@ -53,24 +53,6 @@
 												<i class="mdi mdi-account-outline"></i>
 												</span>
 											</div>
-											<input type="text" name="username" class="form-control" placeholder="Username" value="<?php echo isset($_POST['username']) ? $_POST['username'] : "" ?>">
-										</div>
-										<?php
-											if(isset($_POST['register']) && empty($_POST['username'])) {
-											  $submit_error = true;
-											  ?>
-										    <div class="error mt-2 text-danger" for="username">Please fill in your username</div>
-										<?php
-											}
-											?>
-									</div>
-									<div class="form-group">
-										<div class="input-group">
-											<div class="input-group-prepend">
-												<span class="input-group-text">
-												<i class="mdi mdi-account-outline"></i>
-												</span>
-											</div>
 											<input type="text" name="email" class="form-control" placeholder="Email" value="<?php echo isset($_POST['email']) ? $_POST['email'] : "" ?>">
 										</div>
 										<?php
@@ -87,7 +69,8 @@
                         <?php
                       }
                       else if(isset($_POST['register']) && filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)){
-                        $domain = array_pop(explode('@', $_POST['email']));
+                        $emails = explode('@', $_POST['email']);
+                        $domain = array_pop($emails);
                         if($domain != 'uowmail.edu.au'){
                           $submit_error = true;
                           ?>
@@ -95,6 +78,42 @@
                           <?php
                         }
                       }
+											?>
+									</div>
+                  <div class="form-group">
+										<div class="input-group">
+											<div class="input-group-prepend">
+												<span class="input-group-text">
+												<i class="mdi mdi-lock-outline"></i>
+												</span>
+											</div>
+											<input type="text" name="firstname" class="form-control" placeholder="First Name" value="<?php echo isset($_POST['firstname']) ? $_POST['firstname'] : "" ?>">
+										</div>
+										<?php
+											if(isset($_POST['register']) && empty($_POST['firstname'])) {
+											  $submit_error = true;
+											  ?>
+										    <div class="error mt-2 text-danger" for="password">Please fill in your First Name</div>
+										<?php
+											}
+											?>
+									</div>
+                  <div class="form-group">
+										<div class="input-group">
+											<div class="input-group-prepend">
+												<span class="input-group-text">
+												<i class="mdi mdi-lock-outline"></i>
+												</span>
+											</div>
+											<input type="text" name="lastname" class="form-control" placeholder="Last Name" value="<?php echo isset($_POST['lastname']) ? $_POST['lastname'] : "" ?>">
+										</div>
+										<?php
+											if(isset($_POST['register']) && empty($_POST['lastname'])) {
+											  $submit_error = true;
+											  ?>
+										    <div class="error mt-2 text-danger" for="lastname">Please fill in your Last Name</div>
+										<?php
+											}
 											?>
 									</div>
 									<div class="form-group">
@@ -170,10 +189,12 @@
 		<!-- End custom js for this page -->
     <?php
     if(isset($_POST['register']) && !$submit_error){
-      $username = mysqli_real_escape_string( $dbConnect, $_POST['username'] );
+      $firstname = mysqli_real_escape_string( $dbConnect, $_POST['firstname'] );
+      $lastname = mysqli_real_escape_string( $dbConnect, $_POST['lastname'] );
+      $username = $firstname.' '.$lastname;
       $email = mysqli_real_escape_string( $dbConnect, $_POST['email'] );
       $password = mysqli_real_escape_string( $dbConnect, $_POST['password'] );
-      $result = mysqli_query($dbConnect, "INSERT INTO bmwUsers(userName, userPass, userEmail, userAdmin, userTeacher) VALUES('".$username."', '".md5($password)."', '".$email."', '0', '0')");
+      $result = mysqli_query($dbConnect, "INSERT INTO bmwUsers( userPass, userName, userEmail, userAdmin, userTeacher, firstName, lastName) VALUES('".md5($password)."', '".$username."', '".$email."', '0', '0', '".$firstname."', '".$lastname."')");
       if($result){
         ?>
         <script>
@@ -187,6 +208,8 @@
               visible: true,
               className: "btn btn-primary"
             }
+          }).then(() => {
+            location.href = 'login.php';
           })
         </script>
         <?php
