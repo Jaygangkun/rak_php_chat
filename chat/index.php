@@ -4,7 +4,7 @@ session_start();
 include('includeDatabase.php');
 
 if(!isset($_SESSION['chatUserId']) || empty($_SESSION['chatUserId'])) {
-	header("Location: https://localhost:8903/chat/login.php");
+	header("Location: http://localhost:8903/chat/login.php");
 }
 
 $profile_submit_error = false;
@@ -470,6 +470,8 @@ else {
     <script src="assets/js/shared/settings.js"></script>
 	<script src="assets/js/shared/misc.js"></script>
     <script src="assets/js/shared/todolist.js"></script>
+	<script src="assets/js/shared/tooltips.js"></script>
+	<script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
     <!-- endinject -->
     <!-- Custom js for this page -->
     <!-- End custom js for this page -->
@@ -497,7 +499,6 @@ else {
 		</div>
 	</div>
 	</div>
-	<script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
 	<script>
 		jQuery(document).on('click', '#btn_set_notification', function(){
 			jQuery.post('js/setNotifications.php', {roomId: jQuery(this).attr('roomId'), message: jQuery('#notificationText').val()}, function(response) {

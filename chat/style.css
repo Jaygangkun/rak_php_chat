@@ -72,3 +72,43 @@
 	right: 0px;
 	top: 0px;
 }
+
+.chat-bubble{
+	display: flex;
+}
+
+.chat-user__img{
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
+.chat-bubble-right{
+	flex-grow: 1;
+	margin-left: 10px;
+}
+
+.chat-bubble-right .chat-message{
+	margin-left: 0px !important;
+}
+
+.chat-user__email{
+	font-weight: bold;
+}
+
+.user-group__title{
+	font-weight: bold;
+	border-bottom: 1px solid black;
+	padding-bottom: 5px;
+}
+
+.user-member-wrap p{
+	margin-bottom: 0px;
+}
+
+.user-member-wrap{
+	margin-bottom: 20px;
+}

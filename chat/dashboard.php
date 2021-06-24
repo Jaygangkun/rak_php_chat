@@ -132,6 +132,22 @@
 		  </div>
 		</div>
 	  </div>
+
+	  <div class="col-12 grid-margin">
+		<div class="card">
+		  <div class="card-body">
+			<div class="row">
+			  <div class="col-md-4 col-sm-6 d-flex justify-content-center border-right">
+				<div class="wrapper text-center">
+				  <h4 class="card-title">Search Staff Directory</h4>
+				  <p class="card-description">View info about the University Shuttle</p>
+				  <button class="btn btn-outline-success" onclick="location.href = 'teachers/'">Click here!</button>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		</div>
+	  </div>
 	  
 	  <!--
 	  

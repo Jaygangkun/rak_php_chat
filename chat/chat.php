@@ -167,16 +167,23 @@
 								$lastMessageUserId = $messagesData['messageUserId'];
 							}
 							else {
-								$getMessageUserData = mysqli_query($dbConnect, "SELECT `userName` FROM `bmwusers` WHERE `userId` = '".$messagesData['messageUserId']."'");
+								$getMessageUserData = mysqli_query($dbConnect, "SELECT `userName`, `userEmail`, `profile` FROM `bmwusers` WHERE `userId` = '".$messagesData['messageUserId']."'");
 								$messageUserData = mysqli_fetch_assoc( $getMessageUserData );
 								?>
 								<div class="chat-bubble incoming-chat" <?if($lastMessageUserId == $messagesData['messageUserId']) {?>style="margin-top: 2px;"<?}?>>
-								  <div class="chat-message">
-									<?if($lastMessageUserId != $messagesData['messageUserId']) {?>
-										<p class="font-weight-bold"><? echo $messageUserData['userName']; ?></p>
-									<?}?>
-									<p><? echo $messagesData['messageText']; ?></p>
-								  </div>
+                  <div class="chat-bubble-left">
+                    <?if($lastMessageUserId != $messagesData['messageUserId']) {?>
+                    <div class="chat-user__img" data-toggle="tooltip" data-placement="top" title="<?php echo $messageUserData['userEmail']?>" style="background-image: url('<?php echo $messageUserData['profile']?>')"></div>
+                    <?}?>
+                  </div>
+                  <div class="chat-bubble-right"  <?if($lastMessageUserId == $messagesData['messageUserId']) {?>style="margin-left: 60px;"<?}?>>
+                    <div class="chat-message">
+                    <?if($lastMessageUserId != $messagesData['messageUserId']) {?>
+                      <p class="chat-user__email"><? echo $messageUserData['userName']; ?></p>
+                    <?}?>
+                    <p><? echo $messagesData['messageText']; ?></p>
+                    </div>
+                  </div>
 								</div>
 								<?
 								$lastMessageUserId = $messagesData['messageUserId'];
@@ -247,7 +254,6 @@
     </div>
   </div>
 </div>
-<script src="assets/vendors/sweetalert/sweetalert.min.js"></script>
 <script>
   jQuery(document).on('click', '#btn_create_room', function(){
 
