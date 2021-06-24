@@ -173,7 +173,8 @@
 								<div class="chat-bubble incoming-chat" <?if($lastMessageUserId == $messagesData['messageUserId']) {?>style="margin-top: 2px;"<?}?>>
                   <div class="chat-bubble-left">
                     <?if($lastMessageUserId != $messagesData['messageUserId']) {?>
-                    <div class="chat-user__img" data-toggle="tooltip" data-placement="top" title="<?php echo $messageUserData['userEmail']?>" style="background-image: url('<?php echo $messageUserData['profile']?>')"></div>
+                      <?php $profile_img = $messageUserData['profile'];?>
+                    <div class="chat-user__img" data-toggle="tooltip" data-placement="top" title="<?php echo $messageUserData['userEmail']?>" style="background-image: url('<?php echo $profile_img != '' ? $profile_img."?v=".time() : "assets/images/avatar-default.png" ?>')"></div>
                     <?}?>
                   </div>
                   <div class="chat-bubble-right"  <?if($lastMessageUserId == $messagesData['messageUserId']) {?>style="margin-left: 60px;"<?}?>>

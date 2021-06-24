@@ -13,6 +13,7 @@
 		$cur_group = '';
 		$group_start = false;
 		while($teacherData = mysqli_fetch_assoc( $teachers )) {
+			$profile_img = $teacherData['profile'];
 			if($cur_group != $teacherData['facultyDepartment']){
 				if($group_start){
 					?>
@@ -23,6 +24,7 @@
 				<div class="user-group">
 					<h6 class="user-group__title"><?php echo $teacherData['groupName']?></h6>
 					<div class="user-member-wrap">
+						<div class="user__photo <?php echo $profile_img == '' ? "no-image": "" ?>" id="profile_preview_img" style="background-image: url('<?php echo $profile_img != '' ? $profile_img."?v=".time() : "assets/images/avatar-default.png" ?>')"></div>
 						<p class="user__name"><?php echo $teacherData['firstName'].' '.$teacherData['lastName']?></p>
 						<p class="user__role"><?php echo $teacherData['jobRole']?></p>
 						<p class="user__email"><?php echo $teacherData['userEmail']?></p>
@@ -35,6 +37,7 @@
 			else{
 				?>
 				<div class="user-member-wrap">
+					<div class="user__photo <?php echo $profile_img == '' ? "no-image": "" ?>" id="profile_preview_img" style="background-image: url('<?php echo $profile_img != '' ? $profile_img."?v=".time() : "assets/images/avatar-default.png" ?>')"></div>
 					<p class="user__name"><?php echo $teacherData['firstName'].' '.$teacherData['lastName']?></p>
 					<p class="user__role"><?php echo $teacherData['jobRole']?></p>
 					<p class="user__email"><?php echo $teacherData['userEmail']?></p>
