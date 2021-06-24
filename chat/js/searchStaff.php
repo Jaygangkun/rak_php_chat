@@ -4,10 +4,10 @@ include('../includeDatabase.php');
 session_start();
 
 if(isset($_POST['search']) && !empty($_POST['search'])) {
-	$teachers = mysqli_query($dbConnect, "SELECT * FROM `bmwusers` JOIN `groups` ON bmwusers.facultyDepartment = groups.id WHERE `userTeacher` = '1' AND ( bmwusers.firstName LIKE '%".$_POST['search']."%' OR bmwusers.lastName LIKE '%".$_POST['search']."%' OR bmwusers.userEmail LIKE '%".$_POST['search']."%' OR bmwusers.jobRole LIKE '%".$_POST['search']."%') ORDER BY bmwusers.facultyDepartment");
+	$teachers = mysqli_query($dbConnect, "SELECT * FROM `bmwUsers` JOIN `groups` ON bmwUsers.facultyDepartment = groups.id WHERE `userTeacher` = '1' AND ( bmwUsers.firstName LIKE '%".$_POST['search']."%' OR bmwUsers.lastName LIKE '%".$_POST['search']."%' OR bmwUsers.userEmail LIKE '%".$_POST['search']."%' OR bmwUsers.jobRole LIKE '%".$_POST['search']."%') ORDER BY bmwUsers.facultyDepartment");
 }
 else{
-	$teachers = mysqli_query($dbConnect, "SELECT * FROM `bmwusers` JOIN `groups` ON bmwusers.facultyDepartment = groups.id WHERE `userTeacher` = '1' ORDER BY bmwusers.facultyDepartment");
+	$teachers = mysqli_query($dbConnect, "SELECT * FROM `bmwUsers` JOIN `groups` ON bmwUsers.facultyDepartment = groups.id WHERE `userTeacher` = '1' ORDER BY bmwUsers.facultyDepartment");
 }
 
 $cur_group = '';
@@ -24,8 +24,8 @@ while($teacherData = mysqli_fetch_assoc( $teachers )) {
 			<h6 class="user-group__title"><?php echo $teacherData['groupName']?></h6>
 			<div class="user-member-wrap">
 				<p class="user__name"><?php echo $teacherData['firstName'].' '.$teacherData['lastName']?></p>
-				<p class="user__email"><?php echo $teacherData['userEmail']?></p>
 				<p class="user__role"><?php echo $teacherData['jobRole']?></p>
+				<p class="user__email"><?php echo $teacherData['userEmail']?></p>
 			</div>
 		<?php
 
@@ -36,8 +36,8 @@ while($teacherData = mysqli_fetch_assoc( $teachers )) {
 		?>
 		<div class="user-member-wrap">
 			<p class="user__name"><?php echo $teacherData['firstName'].' '.$teacherData['lastName']?></p>
-			<p class="user__email"><?php echo $teacherData['userEmail']?></p>
 			<p class="user__role"><?php echo $teacherData['jobRole']?></p>
+			<p class="user__email"><?php echo $teacherData['userEmail']?></p>
 		</div>
 		<?php
 	}
